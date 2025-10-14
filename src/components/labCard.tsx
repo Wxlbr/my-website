@@ -26,13 +26,13 @@ export default function LabCard(props: LabCardProps) {
 					}}
 				/>
 			</div>
-			{summary && <p className="mt-2 secondary-text-color text-sm">{summary}</p>}
+			{summary && (
+				<p className="mt-2 secondary-text-color text-sm">{summary}</p>
+			)}
 			{tags?.length > 0 && (
 				<div className="mt-4 flex gap-2 flex-wrap">
 					{tags.map((t) => (
-						<span
-							key={t}
-							className="tag">
+						<span key={t} className="tag">
 							{t}
 						</span>
 					))}

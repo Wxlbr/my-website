@@ -9,7 +9,6 @@ import CodeBlock from "../components/CodeBlock";
 import "../index.css";
 
 const TERMINAL_LANGS = new Set([
-	// Common terminal languages, likely be extended in the future
 	"cmd",
 	"bash",
 	"sh",
@@ -19,7 +18,6 @@ const TERMINAL_LANGS = new Set([
 	"powershell",
 ]);
 const CODE_LANGS = new Set([
-	// Common programming languages, likely be extended in the future
 	"python",
 	"js",
 	"javascript",
@@ -39,8 +37,6 @@ const CODE_LANGS = new Set([
 ]);
 
 function convertObsidianEmbeds(md: string, slug: string): string {
-	// Convert ![[filename.png]] or ![[folder/filename.png]] to /labs/slug/folder/filename.png
-	// so that images are correctly loaded from the lab's folder
 	return md.replace(
 		/!\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/gi,
 		(_m: any, filename: string) => {
@@ -55,18 +51,18 @@ function convertObsidianEmbeds(md: string, slug: string): string {
 }
 
 function parseMarkdownWithTerminals(md: string): any[] {
-	// Parses markdown content and extracts terminal blocks and code blocks
-	// AAssigns 'md' type to regular markdown text, 'term' to terminal blocks, and 'code' to code blocks
 	const pieces = [];
 	const fenceRe = /```(?:([\w-]+))?\n([\s\S]*?)```/g;
 	let m,
 		lastIndex = 0;
 	const promptRe = /^\(([^@]+)@([^\)]+)\)-\[([^\]]+)\]\$\s*(.*)$/;
+
 	while ((m = fenceRe.exec(md)) !== null) {
 		const lang = m[1] ? m[1].toLowerCase() : null;
 		const code = m[2];
 		if (m.index > lastIndex)
 			pieces.push({ type: "md", text: md.slice(lastIndex, m.index) });
+
 		if (lang && TERMINAL_LANGS.has(lang)) {
 			const lines = code.split(/\r?\n/);
 			let i = 0,
@@ -110,7 +106,6 @@ function parseMarkdownWithTerminals(md: string): any[] {
 }
 
 function formatDateField(d: unknown): string {
-	// Formats date field
 	if (!d) return "—";
 	if (d instanceof Date) return d.toLocaleDateString("en-GB");
 	if (typeof d === "string") {
@@ -123,32 +118,31 @@ function formatDateField(d: unknown): string {
 }
 
 function MarkdownBlock({ text }: { text: string }) {
-	// Renders markdown text with palette utility classes
 	return (
 		<ReactMarkdown
 			rehypePlugins={[rehypeRaw, rehypeHighlight]}
 			components={{
 				h1: (props) => (
 					<h1
-						className="text-3xl font-bold primary-text-color mt-10 mb-4 border-b card-border pb-2"
+						className="text-3xl font-bold text-cyan-400 mt-10 mb-4 border-b border-cyan-400/20 pb-2"
 						{...props}
 					/>
 				),
 				h2: (props) => (
 					<h2
-						className="text-2xl font-semibold primary-text-color mt-8 mb-3"
+						className="text-2xl font-semibold text-cyan-400 mt-8 mb-3"
 						{...props}
 					/>
 				),
 				h3: (props) => (
 					<h3
-						className="text-xl font-semibold secondary-text-color mt-6 mb-2"
+						className="text-xl font-semibold text-gray-300 mt-6 mb-2"
 						{...props}
 					/>
 				),
 				h4: (props) => (
 					<h4
-						className="text-lg font-semibold muted-text-color mt-4 mb-2"
+						className="text-lg font-semibold text-gray-400 mt-4 mb-2"
 						{...props}
 					/>
 				),
@@ -159,7 +153,7 @@ function MarkdownBlock({ text }: { text: string }) {
 						<>{children}</>
 					) : (
 						<p
-							className="card-text leading-relaxed my-3"
+							className="text-gray-300 leading-relaxed my-3"
 							{...props}>
 							{children}
 						</p>
@@ -167,7 +161,7 @@ function MarkdownBlock({ text }: { text: string }) {
 				li: (props) => <li className="my-1" {...props} />,
 				strong: (props) => (
 					<strong
-						className="primary-text-color font-semibold"
+						className="text-cyan-400 font-semibold"
 						{...props}
 					/>
 				),
@@ -175,20 +169,16 @@ function MarkdownBlock({ text }: { text: string }) {
 					<img
 						src={src}
 						alt={alt || ""}
-						className="my-6 rounded-lg border card-border shadow-md mx-auto max-h-[500px] object-contain block"
+						className="my-6 rounded-lg border border-cyan-400/20 shadow-md mx-auto max-h-[500px] object-contain block"
 						loading="lazy"
 					/>
 				),
-				hr: () => <hr className="my-8 card-border" />,
+				hr: () => <hr className="my-8 border-cyan-400/20" />,
 			}}>
 			{text}
 		</ReactMarkdown>
 	);
 }
-
-// ---------------------------
-// Main Component
-// ---------------------------
 
 export default function LabDetail() {
 	const { id } = useParams<{ id?: string }>();
@@ -197,27 +187,18 @@ export default function LabDetail() {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 
-	// Fetch and parse Markdown from the lab's markdown file
 	useEffect(() => {
 		async function fetchLab() {
 			if (!id) return;
 			setLoading(true);
 			try {
-				const folderName = id; // For now the id will always match the folder name, check for mapping in the future
-				const path = `/labs/${folderName}/${folderName}.md`;
+				const path = `/labs/${id}/${id}.md`;
 				const res = await fetch(path);
 				const text = await res.text();
 				if (!res.ok || text.startsWith("<!DOCTYPE"))
 					throw new Error("Invalid response");
 				const parsed = fm<any>(text);
-				console.log(
-					"Using folderName for images and markdown:",
-					folderName
-				); // Debug log
-				const body = convertObsidianEmbeds(
-					parsed.body || "",
-					folderName
-				);
+				const body = convertObsidianEmbeds(parsed.body || "", id);
 				setMeta(parsed.attributes || {});
 				setContent(body);
 			} catch (err: any) {
@@ -238,9 +219,10 @@ export default function LabDetail() {
 		? meta.tags.split(",").map((t: string) => t.trim())
 		: [];
 
+	// Loading and Error states
 	if (loading)
 		return (
-			<div className="text-gray-400 text-center mt-10">
+			<div className="text-center text-gray-400 py-12 animate-pulse">
 				Loading lab...
 			</div>
 		);
@@ -253,8 +235,7 @@ export default function LabDetail() {
 
 	return (
 		<div className="relative min-h-screen bg-main card-text">
-			{/* Main content */}
-			<div className="max-w-4xl mx-auto py-10 px-2 sm:px-6">
+			<div className="max-w-4xl mx-auto py-10 px-4 sm:px-6">
 				{/* Back to Labs */}
 				<div className="mb-6">
 					<Link
@@ -263,13 +244,13 @@ export default function LabDetail() {
 						← Back to Labs
 					</Link>
 				</div>
+
 				{/* Header */}
 				<header className="mb-12 border-b card-border pb-6 flex flex-col items-center text-center relative">
 					<img
 						src={`/labs/${id}/logo.png`}
 						alt={(meta.title || id) + " logo"}
-						className="w-24 h-24 rounded-full object-cover border-4 card-border bg-card-dark shadow-2xl mb-4 drop-shadow-lg"
-						style={{ background: "var(--color-bg-card-dark)" }}
+						className="w-24 h-24 rounded-full object-cover border-4 card-border bg-main shadow-2xl mb-4 -mt-2"
 						onError={(e) => {
 							(e.target as HTMLImageElement).style.display =
 								"none";
@@ -283,7 +264,7 @@ export default function LabDetail() {
 						{meta.os || "—"} • Date: {prettyDate}
 					</p>
 					{meta.summary && (
-						<p className="text-lg card-text italic font-medium mt-2 mb-2 max-w-2xl mx-auto">
+						<p className="text-lg secondary-text-color italic font-medium mt-2 mb-2 max-w-2xl mx-auto">
 							{meta.summary}
 						</p>
 					)}
@@ -292,20 +273,20 @@ export default function LabDetail() {
 							{tags.map((t) => (
 								<span
 									key={t}
-									className="tag cursor-pointer hover:tag-hover">
+									className="px-3 py-1 text-xs rounded-full border card-border secondary-text-color">
 									{t}
 								</span>
 							))}
 						</div>
 					)}
-					{/* Divider */}
 					<div className="w-full flex justify-center mt-8">
 						<hr className="w-2/3 border-t-2 card-border shadow" />
 					</div>
 				</header>
+
 				{/* Markdown body */}
 				<article
-					className="prose prose-invert max-w-5xl bg-card border-2 card-border shadow-2xl rounded-2xl px-6 sm:px-12 py-10 mx-auto mb-10 transition-all duration-200"
+					className="max-w-5xl bg-card border card-border shadow-2xl rounded-2xl px-6 sm:px-12 py-10 mx-auto mb-10 transition-all duration-200"
 					style={{ lineHeight: 1.85 }}>
 					{pieces.map((p, i) => {
 						if (p.type === "md")
