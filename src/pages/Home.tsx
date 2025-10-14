@@ -325,7 +325,7 @@ export default function Home() {
 						privilege escalation, and capturing the flag.
 					</p>
 					<Link
-						to="/write-ups"
+						to="/labs"
 						className="px-6 py-3 rounded-lg border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black transition">
 						View All Write-Ups
 					</Link>
