@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { FaGithub, FaLinkedin, FaBug, FaGraduationCap } from "react-icons/fa";
+import { FaBug, FaGraduationCap } from "react-icons/fa";
 import { SiHackthebox } from "react-icons/si";
 import { Link } from "react-router-dom";
 import FractalNetworkCore from "../components/FractalNetworkCore";
@@ -35,14 +35,6 @@ function useRevealAnimation(): [React.RefObject<HTMLElement | null>, boolean] {
 }
 
 export default function Home() {
-	const [scrolled, setScrolled] = useState(false);
-
-	useEffect(() => {
-		const handleScroll = () => setScrolled(window.scrollY > 100);
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
-
 	// TODO: Move to data file
 	// TODO: Add root and user owns
 	// TODO: Fetch from API or database?
