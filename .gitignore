@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Temp Hidden files for Testing
-public/*
+# public/*
